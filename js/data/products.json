@@ -1,0 +1,30 @@
+[
+	{
+		name: "Apple Butter",
+		sizes: [4]
+	},
+	{
+		name: "Brandy-soaked cherries",
+		sizes: [8] 
+	},
+	{
+		name: "Meyer Lemon and Rose Petal Jam",
+		sizes: [4, 12.5]
+	},
+	{
+		name: "Apricot Mustard",
+		sizes: [4] 
+	},
+	{
+		name: "Grapefruit Mint Syrup",
+		sizes: [8, 12.5] 
+	},
+	{
+		name: "Navel Orange Jam",
+		sizes: [12.5] 
+	},
+	{
+		name: "Grand Marnier-spiced cranberries",
+		sizes: [12.5]
+	}
+]
