@@ -58,6 +58,7 @@ define(
 			}
 		];
 
+		// model definition
 		var ProductModel = Backbone.Model.extend({
 			defaults: {
 				name: '',
@@ -65,35 +66,37 @@ define(
 			}
 		});
 
+		// collection model defintion
 		var ProductCollection = Backbone.Collection.extend({
 			model: ProductModel
 		});
 
-		var allProducts = new ProductCollection();
 
+		// view definition
 		var ProductListView = Backbone.View.extend({
 			tagName: 'ul',
 			className: 'product-list-view',
 			initialize: function() {
 				$('body').append(this.$el);
-				this.listenTo(this.collection, "initialized", this.render);
 			},
 			render: function() {
 				this.$el.empty();
 
-				this.collection.forEach(function(product) {
-					this.$el.append($('<li><strong>' + product.get('name') + '</strong>. ' + product.get('sizes').join(',') + '</li>'));
-				}.bind(this));
+				this.$el.append($(_.template(this.template, { products: this.collection.toArray() })));
 
 				return this;
-			}
+			},
+			template: '' + 
+				'<% _.each(products, function(product) { %>' +
+					'<li><strong><%= product.get("name") %></strong>. <%= product.get("sizes").join(",") %> </li>' +
+				'<%}); %>'
 		});
 
-		var mainView = new ProductListView({
-			collection: allProducts
-		});
 
-		productsJson.forEach(function(productData) {
+		// set up page
+		// first build the udnerlying collection
+		var allProducts = new ProductCollection();
+		_.forEach(productsJson, function(productData) {
 			var product = new ProductModel({
 				name: productData.name,
 				sizes: productData.sizes
@@ -101,9 +104,12 @@ define(
 
 			allProducts.add(product);
 		});
-		allProducts.trigger('initialized');
 
 
+		// make a main view
+		var mainView = new ProductListView({
+			collection: allProducts
+		}).render();
 
 	}
 );
