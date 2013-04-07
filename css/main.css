@@ -1,22 +1,111 @@
 <style>
     body {
-        background: #999999;
+        background-color: #FFFFF2 !important;
     }
-    .container {
-        margin-top: 10px;
-    }
-
-    img {
-        border-radius: 5px;
+   
+    #container {
         margin: auto;
-        display: block;
-        height:500px;
+        width: 100%;
+        margin-top: 75px;
+        margin-bottom: 75px;
+        background-color: #FFFFF2;
     }
 
-    .hero-unit {
-        padding:30px;
-        margin:auto;
-        margin-top:5px;
-        width: 412px;
+
+    hr {
+        border-top-color: rgb(200, 200, 200);
+        clear:both;
     }
+
+    div#content {
+        height: 1100px;
+        overflow-x: hidden;
+        white-space: nowrap;
+    }
+
+    ul.product-list-view {
+        -webkit-transition: left 500ms;
+        -moz-transition: left 500ms;
+        position: relative;
+        left: 980px;
+    }
+
+  
+    ul.product-list-view>li {
+        display: inline-block;
+        width: 800px;
+        height: 400px;
+        overflow: hidden;
+        margin: 5px;   
+        position:relative;
+        border: 1px solid black;
+        border-radius: 5px;
+    }
+
+    .product-list-view .left-control,
+    .product-list-view .right-control,
+    .product-list-view .img-container,
+    .product-list-view .details-container {
+        position: relative;
+        display: inline-block;
+        height: 500px;
+        float: left;
+    }
+
+    .product-list-view .left-control,
+    .product-list-view .right-control {
+        width: 50px;
+        cursor: pointer;
+        padding-top: 100px;
+        height: 400px; /* height minus padding */
+        font-size: 50px;
+        display: none;
+    }
+
+    .product-list-view li.right-periphery .left-control,
+    .product-list-view li.left-periphery .right-control {
+        display: inline-block;
+    }
+
+    .product-list-view .img-container {
+        width: 300px;
+    }
+
+    .product-list-view .details-container {
+        width: 380px;
+    }
+
+    .product-list-view .img-container img {
+        max-height: 250px;
+        margin-top: 75px;
+        border-radius: 5px;
+    }
+
+    .product-list-view .details-container h1 {
+        color: #151515;
+    }
+
+    .product-list-view .price {
+        color: #5E6469;
+    }
+
+    .product-list-view .details-container .sizes li {
+        display: inline-block;
+        float: left;
+        border: 1px solid black;
+        cursor: pointer;
+    }
+
+    .product-list-view .details-container .sizes li.selected {
+        background-color: gray;
+    }
+
+    .btn.btn-primary.btn-large {
+        background-color: #FFFBE5;
+        background-image: none;
+        color: black;
+        text-shadow: none;
+        border-color: #00A78D;
+    }
+
 </style>
