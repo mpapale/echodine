@@ -57,8 +57,9 @@ define(
 				name: "Apricot Mustard",
 				options: [{
 					price: 1.0,
-					size: 4
-				}] 
+					size: 4,
+					soldOut: true
+				}],
 			},
 			{
 				name: "Grapefruit Mint Syrup",
@@ -94,7 +95,8 @@ define(
 		var ProductModel = Backbone.Model.extend({
 			defaults: {
 				name: '',
-				sizes: []
+				options: [],
+				soldOut: false
 			}
 		});
 
@@ -102,6 +104,7 @@ define(
 		var ProductCollection = Backbone.Collection.extend({
 			model: ProductModel
 		});
+
 
 
 		// view definition
@@ -112,6 +115,7 @@ define(
 				$('#content').append(this.$el);
 			},
 			render: function() {
+				var shoppingCart = this.shoppingCart;
 				this.$el.empty();
 
 				this.$el.append($(_.template(this.template, { 
@@ -176,10 +180,12 @@ define(
 				this.$el.find('li').first().next().addClass('right-periphery');
 
 
-				// toggling of sizes
+				// toggling of sizes and adding to shopping cart
 				var cards = this.$el.children('li');
 				_.each(cards, function(card) {
 					var sizes = $(card).find('.details-container .sizes li');
+					var buyMeButton = $(card).find('button');
+
 					sizes.first().addClass('selected');
 
 					sizes.click(function() {
@@ -188,6 +194,32 @@ define(
 						currentSize.addClass('selected');
 						var price = parseInt(currentSize.attr('data-price')).toFixed(2);
 						$(card).find('.details-container .price').text('$' + price);
+
+						var soldOut = currentSize.attr('data-sold-out') === 'true';
+						// this is nasty
+						var inCart = currentSize.attr('data-in-cart') === 'true';
+
+
+						if (soldOut) {
+							buyMeButton.addClass('sold-out');
+							buyMeButton.
+						}
+					});
+
+					buyMeButton.click(function() {
+						var currentSize = $(card).find('.details-container .sizes .selected');
+
+						if (!buyMeButton.hasClass('sold-out') &&
+							!buyMeButton.hasClass('in-cart')) {
+							// TODO deduplication
+							shoppingCart.add(new ProductModel({
+
+							}));
+
+							buyMeButton.addClass('in-cart');
+							buyMeButton.text('In cart!');
+							currentSize.attr('data-in-cart', 'true');
+						}
 					});
 				});
 
@@ -206,37 +238,87 @@ define(
 							'<div class="price">$<%= product.get("options")[0].price.toFixed(2) %></div>' +
 							'<ul class="sizes">' +
 								'<% _.each(product.get("options"), function(option) { %>' +
-									'<li data-price="<%= option.price %>"><%= option.size %> oz</li>' +
+									'<li data-price="<%= option.price %>" data-sold-out="<%= option.soldOut %>"><%= option.size %> oz</li>' +
 								'<% }); %>' +
 							'</ul>' +
 							'<div style="clear:both;"></div>' +
-							'<button class="btn btn-primary btn-large" type="button">Buy me!</button>' +
+							'<button class="btn btn-primary btn-large<%= product.options[0].soldOut ? " sold-out" : "" %>" type="button">' +
+								'<%= product.options[0].soldOut ? "Buy me!" : "Sold out!" %>' +
+							'</button>' +
 						'</div>' +
 						'<div class="right-control">&lt;</div>' +
 					'</li>' +
 				'<%}); %>'
 		});
 
+		// order view definition
+		var OrderView = Backbone.View.extend({
+			tagName: 'div',
+			className: 'order-view',
+			initialize: function() {
+				this.$el.append('<ul class="orders" />');
+				this.$el.append('<div id="confirmation" />');
+
+				$('#container').append(this.$el);
+			},
+			render: function() {
+				this.$el.empty();
+				var $listEl = this.$el.children('ul.orders');
+
+				// fuck templates
+				this.collection.each(function(product) {
+					var $listItem = $('<li />');
+
+					$listItem
+						.append($('<span>X</span>')
+							.click(function () {
+								$listItem.remove();
+							})
+						)
+						.append('<strong>' + product.name + '</strong>' + 
+							' $' + product.options[0].price.toFixed(2) + 
+							' ' + product.options[0].size + 'oz'
+						);
+
+					$listEl.append($listItem);
+
+				});
+
+
+			}
+		});
+
 
 		// set up page
 		// first build the udnerlying collection
 		var allProducts = new ProductCollection();
-		_.forEach(productsJson, function(productData) {
+		_.each(productsJson, function(productData) {
 			var product = new ProductModel({
 				name: productData.name,
-				options: productData.options.sort(function(optA, optB) {
-					return optA.size - optB.size;
-				})
+				options: _.map(productData.options, function(option) {
+						option.soldOut = !!option.soldOut;
+						return option;
+					}).sort(function(optA, optB) {
+						return optA.size - optB.size;
+					})
 			});
 
 			allProducts.add(product);
 		});
 
+		// initialize a shopping cart
+		var shoppingCart = new ProductCollection();
+
 
 		// make a main view
 		var mainView = new ProductListView({
-			collection: allProducts
+			collection: allProducts,
+			shoppingCart: shoppingCart
 		}).render();
+
+		var orderView = new OrderView({
+			collection: shoppingCart
+		});
 
 	}
 );
