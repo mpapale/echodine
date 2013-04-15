@@ -115,11 +115,27 @@ define(
 
 
 		// view definition
+		// TODO rewrite this code so that render takes into account
+		// the current state of the shopping cart
 		var ProductListView = Backbone.View.extend({
 			tagName: 'ul',
 			className: 'product-list-view',
 			initialize: function() {
 				$('#content').append(this.$el);
+				this.options.shoppingCart.bind('remove', this.itemRemoved, this);
+			},
+			itemRemoved: function(product) {
+				var $listEl = this.$el.children('li[data-name="' + product.get('name') + '"]');
+				var $sizeEl = $listEl.find('.sizes li[data-size="' + product.get('options')[0].size + '"]');
+				var buyMeButton = $listEl.find('button');
+
+				$sizeEl.attr('data-in-cart', 'false');
+
+				if ($sizeEl.hasClass('selected')) {
+					buyMeButton.removeClass('in-cart');
+					buyMeButton.text('Buy me!');
+				}
+
 			},
 			render: function() {
 				var shoppingCart = this.options.shoppingCart;
@@ -202,7 +218,7 @@ define(
 						buyMeButton.removeClass('in-cart');
 						_.each(sizes, function (size) { $(size).removeClass('selected'); });
 						currentSize.addClass('selected');
-						var price = parseInt(currentSize.attr('data-price')).toFixed(2);
+						var price = parseFloat(currentSize.attr('data-price')).toFixed(2);
 						$(card).find('.details-container .price').text('$' + price);
 
 						var soldOut = currentSize.attr('data-sold-out') === 'true';
@@ -228,7 +244,13 @@ define(
 							!buyMeButton.hasClass('in-cart')) {
 							// TODO deduplication
 							shoppingCart.add(new ProductModel({
-
+								name: $(card).attr('data-name'),
+								options: [
+									{
+										price:  parseFloat(currentSize.attr('data-price')),
+										size: parseFloat(currentSize.attr('data-size'))
+									}
+								]
 							}));
 
 							buyMeButton.addClass('in-cart');
@@ -243,7 +265,7 @@ define(
 			},
 			template: '' + 
 				'<% _.each(products, function(product) { %>' +
-					'<li>' +
+					'<li data-name="<%= product.get("name") %>" >' +
 						'<div class="left-control">&gt;</div>' +
 						'<div class="img-container">' +
 							'<img src="<%= imageResource(product.get("name")) %>" />' +
@@ -253,7 +275,7 @@ define(
 							'<div class="price">$<%= product.get("options")[0].price.toFixed(2) %></div>' +
 							'<ul class="sizes">' +
 								'<% _.each(product.get("options"), function(option) { %>' +
-									'<li data-price="<%= option.price %>" data-sold-out="<%= option.soldOut %>"><%= option.size %> oz</li>' +
+									'<li data-price="<%= option.price %>" data-sold-out="<%= option.soldOut %>" data-size="<%= option.size %>" ><%= option.size %> oz</li>' +
 								'<% }); %>' +
 							'</ul>' +
 							'<div style="clear:both;"></div>' +
@@ -271,33 +293,50 @@ define(
 			tagName: 'div',
 			className: 'order-view',
 			initialize: function() {
-				this.$el.append('<ul class="orders" />');
-				this.$el.append('<div id="confirmation" />');
+				var ordersViewEl = this.$el;
+				ordersViewEl.append($('<span class="close-button">X</span>').click(function() {
+					ordersViewEl.hide();
+				}));
+				ordersViewEl.append(
+					'<div class="orders-container">' +
+						'<ul class="orders"></ul>' +
+						'<div id="confirmation"></div>' +
+					'</div>'
+				);
+				$('#container').append(ordersViewEl);
 
-				$('#container').append(this.$el);
+				this.listenTo(this.collection, 'remove', this.render);
 			},
 			render: function() {
-				this.$el.empty();
-				var $listEl = this.$el.children('ul.orders');
+				var ordersContainer = this.$el.children('.orders-container');
+				ordersContainer.children().empty();
+				var $listEl = ordersContainer.children('ul.orders');
+				var shoppingCart = this.collection;
 
 				// fuck templates
-				this.collection.each(function(product) {
-					var $listItem = $('<li />');
+				if (this.collection.length > 0) {
+					this.collection.each(function(product) {
+						var $listItem = $('<li />');
 
-					$listItem
-						.append($('<span>X</span>')
-							.click(function () {
-								$listItem.remove();
-							})
-						)
-						.append('<strong>' + product.name + '</strong>' + 
-							' $' + product.options[0].price.toFixed(2) + 
-							' ' + product.options[0].size + 'oz'
-						);
+						$listItem
+							.append($('<span>X</span>')
+								.click(function () {
+									shoppingCart.remove(product);
+								})
+							)
+							.append('<strong>' + product.get("name") + '</strong>' + 
+								' $' + product.get("options")[0].price.toFixed(2) + 
+								' ' + product.get("options")[0].size + 'oz'
+							);
 
-					$listEl.append($listItem);
+						$listEl.append($listItem);
 
-				});
+					});
+				} else {
+					$listEl.text('You have no items in your shopping cart');
+				}
+
+				this.$el.show();
 
 
 			}
@@ -333,6 +372,10 @@ define(
 
 		var orderView = new OrderView({
 			collection: shoppingCart
+		});
+
+		$('img.douchey-jar').click(function() {
+			orderView.render();
 		});
 
 	}
