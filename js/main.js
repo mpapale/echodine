@@ -33,24 +33,28 @@ define(
 				name: "Apple Butter",
 				options: [{
 					price: 1.0,
-					size: 4
+					size: 4,
+					soldOut: false
 				}]
 			},
 			{
 				name: "Brandy-soaked cherries",
 				options: [{
 					price: 2.0,
-					size: 8
+					size: 8,
+					soldOut: false
 				}]
 			},
 			{
 				name: "Meyer Lemon and Rose Petal Jam",
 				options: [{
 					price: 1.0,
-					size: 4
+					size: 4,
+					soldOut: false
 				}, {
 					price: 2.0,
-					size: 12.5
+					size: 12.5,
+					soldOut: false
 				}]
 			},
 			{
@@ -65,24 +69,28 @@ define(
 				name: "Grapefruit Mint Syrup",
 				options: [{
 					price: 2.0,
-					size: 8
+					size: 8,
+					soldOut: false
 				}, { 
 					price: 3.0,
-					size: 12.5
+					size: 12.5,
+					soldOut: false
 				}] 
 			},
 			{
 				name: "Navel Orange Jam",
 				options: [{
 					price: 2.0, 
-					size: 12.5
+					size: 12.5,
+					soldOut: false
 				}] 
 			},
 			{
 				name: "Grand Marnier-spiced cranberries",
 				options: [{
 					price: 3.0,
-					size: 12.5
+					size: 12.5,
+					soldOut: false
 				}]
 			}
 		];
@@ -95,8 +103,7 @@ define(
 		var ProductModel = Backbone.Model.extend({
 			defaults: {
 				name: '',
-				options: [],
-				soldOut: false
+				options: []
 			}
 		});
 
@@ -115,7 +122,7 @@ define(
 				$('#content').append(this.$el);
 			},
 			render: function() {
-				var shoppingCart = this.shoppingCart;
+				var shoppingCart = this.options.shoppingCart;
 				this.$el.empty();
 
 				this.$el.append($(_.template(this.template, { 
@@ -182,14 +189,17 @@ define(
 
 				// toggling of sizes and adding to shopping cart
 				var cards = this.$el.children('li');
-				_.each(cards, function(card) {
+				_.each(cards, function (card) {
 					var sizes = $(card).find('.details-container .sizes li');
 					var buyMeButton = $(card).find('button');
+					
 
 					sizes.first().addClass('selected');
 
 					sizes.click(function() {
 						var currentSize = $(this);
+						buyMeButton.removeClass('sold-out');
+						buyMeButton.removeClass('in-cart');
 						_.each(sizes, function (size) { $(size).removeClass('selected'); });
 						currentSize.addClass('selected');
 						var price = parseInt(currentSize.attr('data-price')).toFixed(2);
@@ -202,11 +212,16 @@ define(
 
 						if (soldOut) {
 							buyMeButton.addClass('sold-out');
-							buyMeButton.
+							buyMeButton.text('Sold out!');
+						} else if (inCart) {
+							buyMeButton.addClass('in-cart');
+							buyMeButton.text('In cart!');
+						} else {
+							buyMeButton.text('Buy me!');
 						}
 					});
 
-					buyMeButton.click(function() {
+					buyMeButton.click(function () {
 						var currentSize = $(card).find('.details-container .sizes .selected');
 
 						if (!buyMeButton.hasClass('sold-out') &&
@@ -242,8 +257,8 @@ define(
 								'<% }); %>' +
 							'</ul>' +
 							'<div style="clear:both;"></div>' +
-							'<button class="btn btn-primary btn-large<%= product.options[0].soldOut ? " sold-out" : "" %>" type="button">' +
-								'<%= product.options[0].soldOut ? "Buy me!" : "Sold out!" %>' +
+							'<button class="btn btn-primary btn-large<%= product.get("options")[0].soldOut ? " sold-out" : "" %>" type="button">' +
+								'<%= product.get("options")[0].soldOut ? "Sold out!" : "Buy me!" %>' +
 							'</button>' +
 						'</div>' +
 						'<div class="right-control">&lt;</div>' +
