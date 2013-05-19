@@ -25,6 +25,9 @@ define(
 	], 
 
 	function($, _, Backbone) {
+		var CARD_WIDTH = 800;
+		var CARD_MARGIN = 5;
+		var CARD_CONTAINER_MARGIN = 25;
 
 
 		// TODO move this to something better
@@ -146,13 +149,17 @@ define(
 					imageResource: imageResource
 				})));
 
+				var distanceToMoveCard = function() {
+					return CARD_WIDTH + 2*CARD_MARGIN;
+				};
+
 
 				// sliding controls
 				var children = this.$el.children('li');
 				var ul = this.$el;
 				this.$el.find('.right-control').click(function() {
 					var currentLeft = parseInt(ul.css('left'));
-					ul.css('left', currentLeft + 980 + 'px');
+					ul.css('left', currentLeft + distanceToMoveCard() + 'px');
 
 					var left = $(ul.find('li.left-periphery'));
 					var right = $(ul.find('li.right-periphery'));
@@ -177,7 +184,7 @@ define(
 
 				this.$el.find('.left-control').click(function() {
 					var currentLeft = parseInt(ul.css('left'));
-					ul.css('left', currentLeft - 980 + 'px');
+					ul.css('left', currentLeft - distanceToMoveCard() + 'px');
 
 					var left = $(ul.find('li.left-periphery'));
 					var right = $(ul.find('li.right-periphery'));
@@ -259,6 +266,26 @@ define(
 						}
 					});
 				});
+
+				var positionCardContainer = function(container) {
+					var leftOffset = Math.max(0, ($(window).width() - CARD_WIDTH) / 2) - CARD_CONTAINER_MARGIN;
+					var cards = container.children('li');
+					var selectedIndex = 0;
+
+					_.each(cards, function(card, cardIndex) { if ($(card).hasClass('left-periphery')) { selectedIndex = cardIndex + 1; }});
+
+					leftOffset = leftOffset - (selectedIndex * (CARD_WIDTH + 2*CARD_MARGIN));
+					console.log('computed leftOffset: ' + leftOffset);
+					container.css('left', leftOffset + 'px');
+				};
+
+				positionCardContainer(this.$el);
+
+				$(window).resize((function($el) {
+					return function() {
+						positionCardContainer($el);
+					};
+				}(this.$el)));
 
 
 				return this;
