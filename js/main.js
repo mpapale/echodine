@@ -6,11 +6,11 @@ require.config({
 		"contrib/backbone": {
 			deps: ["contrib/underscore", "jquery"],
 			exports: "Backbone"
-		}//,
-		// "contrib/bootstrap": {
-		// 	deps: ["jquery"],
-		// 	exports: "$.fn.popover" // kind of a hack, we choose one of bootstrap's "exports" arbitrarily
-		// }
+		},
+		"contrib/bootstrap": {
+			deps: ["jquery"],
+			exports: "$.fn.popover" // kind of a hack, we choose one of bootstrap's "exports" arbitrarily
+		}
 	},
 
 	enforceDefine: true
@@ -21,7 +21,8 @@ define(
 	[
 		"jquery", 
 		"contrib/underscore", 
-		"contrib/backbone"
+		"contrib/backbone",
+		"contrib/bootstrap"
 	], 
 
 	function($, _, Backbone) {
@@ -320,22 +321,131 @@ define(
 			tagName: 'div',
 			className: 'order-view',
 			initialize: function() {
+				var that = this;
 				var ordersViewEl = this.$el;
-				ordersViewEl.append($('<span class="close-button">X</span>').click(function() {
-					ordersViewEl.hide();
-				}));
+				// ordersViewEl.append($('<span class="close-button">X</span>').click(function() {
+				// 	ordersViewEl.hide();
+				// }));
 				ordersViewEl.append(
-					'<div class="orders-container">' +
-						'<ul class="orders"></ul>' +
-						'<div id="confirmation"></div>' +
-					'</div>'
+					'<div class="modal-header">' +
+						'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>' +
+						'<h3>Shopping Cart</h3>' +
+					'</div>' +
+					'<div class="modal-body">' +
+						'<div class="orders-container">' +
+							'<ul class="orders"></ul>' +
+							'<div id="confirmation"></div>' +
+						'</div>' +
+					'</div>' +
+					'<div class="modal-footer">' +
+						'<form class="form-horizontal">' +
+							'<div class="control-group">' +
+								'<label class="control-label" for="customer-name">Your name</label>' +
+								'<div class="controls">' +
+									'<input id="customer-name" type="text"></input>' +
+								'</div>' +
+							'</div>' +
+							'<div class="control-group">' +
+								'<label class="control-label" for="customer-address1">Address line 1</label>' +
+								'<div class="controls">' +
+									'<input id="customer-address1" type="text"></input>' +
+								'</div>' +
+							'</div>' +
+							'<div class="control-group">' +
+								'<label class="control-label" for="customer-address2">Address line 2</label>' +
+								'<div class="controls">' +
+									'<input id="customer-address2" type="text"></input>' +
+								'</div>' +
+							'</div>' +
+							'<div class="control-group">' +
+								'<label class="control-label" for="customer-city">City</label>' +
+								'<div class="controls">' +
+									'<input id="customer-city" type="text"></input>' +
+								'</div>' +
+							'</div>' +
+							'<div class="control-group">' +
+								'<label class="control-label" for="customer-state">State</label>' +
+								'<div class="controls">' +
+									'<input class="input-mini" id="customer-state" type="text"></input>' +
+								'</div>' +
+							'</div>' +
+							'<div class="control-group">' +
+								'<label class="control-label" for="customer-zip">Zip</label>' +
+								'<div class="controls">' +
+									'<input class="input-small" id="customer-zip" type="text"></input>' +
+								'</div>' +
+							'</div>' +
+							'<div class="control-group">' +
+								'<label class="control-label" for="customer-extra">Anything extra to tell Nisha:</label>' +
+								'<div class="controls">' +
+									'<textarea id="customer-extra" rows="3"></textarea>' +
+								'</div>' +
+							'</div>' +
+						'</form>' +
+						'<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>' +
+    					'<button class="btn btn-primary" id="order-button">Order!</button>' +
+  					'</div>'
 				);
+				ordersViewEl.addClass('modal hide fade');
+				ordersViewEl.attr({
+					'id': 'order-view',
+					'tabindex': '-1',
+					'role': 'dialog',
+					'aria-hidden': 'true' 
+				});
 				$('#container').append(ordersViewEl);
+
+				$('#order-button').click(function() {
+					var name = $('#customer-name').val();
+					var address1 = $('#customer-address1').val();
+					var address2 = $('#customer-address2').val();
+					var city = $('#customer-city').val();
+					var state = $('#customer-state').val();
+					var zip = $('#customer-zip').val();
+					var extra = $('#customer-extra').val();
+
+					// TODO validation
+
+					var subject = "[EchoDine] New order";
+					var recipient = "nvahora@gmail.com";
+					var body = "Hello Nisha!\n\n" +
+						name + " has requested the following items: \n\n";
+
+					var total = 0;
+					that.collection.each(function(item) {
+						var option = item.get('options')[0];
+						body += "    " + option.size + "oz " + item.get('name') + " for $" + option.price.toFixed(2) + "\n";
+						total += option.price;
+					});
+
+					body += "\n\n";
+					body += "For a total of: $" + total.toFixed(2) + "\n";
+					body += "Expect a PayPal payment soon!\n\n";
+					
+					body += name + "'s address:\n\n";
+					body += "    " + name + "\n";
+					body += "    " + address1 + "\n";
+					body += (address2 ? "    " + address2 + "\n" : "");
+					body += "    " + city + ", " + state + " " + zip + "\n\n";
+
+					if (extra) {
+						body += "Extra words from " + name + ":\n\n";
+						body += extra + "\n\n";
+					}
+
+					body += "Yours,\n";
+					body += "The EchoDine Bot";
+
+
+
+					window.location.href = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+				});
+
 
 				this.listenTo(this.collection, 'remove', this.render);
 			},
 			render: function() {
-				var ordersContainer = this.$el.children('.orders-container');
+				var ordersContainer = this.$el.find('.orders-container');
 				ordersContainer.children().empty();
 				var $listEl = ordersContainer.children('ul.orders');
 				var shoppingCart = this.collection;
