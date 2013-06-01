@@ -159,7 +159,7 @@ define(
 				var children = this.$el.children('li');
 				var ul = this.$el;
 				this.$el.find('.right-control').click(function() {
-					var currentLeft = parseInt(ul.css('left'));
+					var currentLeft = ul.position().left; // parseInt(ul.css('left'));
 					ul.css('left', currentLeft + distanceToMoveCard() + 'px');
 
 					var left = $(ul.find('li.left-periphery'));
@@ -184,7 +184,7 @@ define(
 				});
 
 				this.$el.find('.left-control').click(function() {
-					var currentLeft = parseInt(ul.css('left'));
+					var currentLeft = ul.position().left; //parseInt(ul.css('left'));
 					ul.css('left', currentLeft - distanceToMoveCard() + 'px');
 
 					var left = $(ul.find('li.left-periphery'));
@@ -305,6 +305,7 @@ define(
 								'<% _.each(product.get("options"), function(option) { %>' +
 									'<li data-price="<%= option.price %>" data-sold-out="<%= option.soldOut %>" data-size="<%= option.size %>" ><%= option.size %> oz</li>' +
 								'<% }); %>' +
+								'<div style="clear:both;"></div>' +
 							'</ul>' +
 							'<div style="clear:both;"></div>' +
 							'<button class="btn btn-primary btn-large<%= product.get("options")[0].soldOut ? " sold-out" : "" %>" type="button">' +
@@ -456,14 +457,14 @@ define(
 						var $listItem = $('<li />');
 
 						$listItem
-							.append($('<span>X</span>')
-								.click(function () {
-									shoppingCart.remove(product);
-								})
-							)
 							.append('<strong>' + product.get("name") + '</strong>' + 
 								' $' + product.get("options")[0].price.toFixed(2) + 
 								' ' + product.get("options")[0].size + 'oz'
+							)
+							.append($('<span class="delete">delete</span>')
+								.click(function () {
+									shoppingCart.remove(product);
+								})
 							);
 
 						$listEl.append($listItem);
