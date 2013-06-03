@@ -33,42 +33,17 @@ define(
 
 		// TODO move this to something better
 		var productsJson = [
+
 			{
-				name: "Apple Butter",
+				name: "Navel Orange Marmalade",
 				options: [{
-					price: 1.0,
-					size: 4,
-					soldOut: false
-				}]
-			},
-			{
-				name: "Brandy-soaked cherries",
-				options: [{
-					price: 2.0,
-					size: 8,
-					soldOut: false
-				}]
-			},
-			{
-				name: "Meyer Lemon and Rose Petal Jam",
-				options: [{
-					price: 1.0,
-					size: 4,
-					soldOut: false
-				}, {
-					price: 2.0,
+					price: 2.0, 
 					size: 12.5,
 					soldOut: false
-				}]
+				}] 
 			},
-			{
-				name: "Apricot Mustard",
-				options: [{
-					price: 1.0,
-					size: 4,
-					soldOut: true
-				}],
-			},
+
+
 			{
 				name: "Grapefruit Mint Syrup",
 				options: [{
@@ -82,21 +57,75 @@ define(
 				}] 
 			},
 			{
-				name: "Navel Orange Jam",
-				options: [{
-					price: 2.0, 
-					size: 12.5,
-					soldOut: false
-				}] 
-			},
-			{
-				name: "Grand Marnier-spiced cranberries",
+				name: "Grand Marnier-spiced Cranberry Preserves",
 				options: [{
 					price: 3.0,
 					size: 12.5,
 					soldOut: false
 				}]
+			},
+
+			{
+				name: "Brandy-soaked Cherries",
+				options: [{
+					price: 2.0,
+					size: 8,
+					soldOut: false
+				}]
+			},
+
+			{
+				name: "Meyer Lemon and Rose Petal Jelly",
+				options: [{
+					price: 1.0,
+					size: 4,
+					soldOut: false
+				}, {
+					price: 2.0,
+					size: 12.5,
+					soldOut: false
+				}]
+			},
+
+			{
+				name: "Kumquat Preserves",
+				options: [{
+					price: 1.0,
+					size: 8,
+					soldOut: false
+				}]
+			},
+
+			{
+				name: "Kishu Mandarin Jam",
+				options: [{
+					price: 1.0,
+					size: 8,
+					soldOut: false
+				}]
+			},
+
+			{
+				name: "Apple Butter",
+				options: [{
+					price: 1.0,
+					size: 4,
+					soldOut: false
+				}]
+			},
+			
+			
+			{
+				name: "Apricot Mustard",
+				options: [{
+					price: 1.0,
+					size: 4,
+					soldOut: false
+				}],
 			}
+			
+			
+			
 		];
 		// TODO not this
 		var imageResource = function(productName) {
